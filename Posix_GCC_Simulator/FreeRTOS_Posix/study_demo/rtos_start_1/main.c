@@ -4,60 +4,44 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#if 0
-#define os_printf(...)  printf("", _line_,);
-#else
-#define os_printf  printf
-#endif
+#define __FILENAME__ (strrchr(__FILE__, '/') ? (strrchr(__FILE__, '/') + 1):__FILE__)
+#define os_printf(_fmt_, ...) \
+        printf("[log]%s:%d | "_fmt_"\r\n", __FILENAME__, __LINE__, ##__VA_ARGS__)
 
-static xTaskHandle xTask_first;
-static xTaskHandle xTask_second;
+static TaskHandle_t xTask_creat;
 
-static void first_task(void *p)
+static void creat_task(void *p)
 {
-    os_printf("%s\r\n", __FUNCTION__);
+    os_printf("%s", __FUNCTION__);
     int cnt = 0;
 
-    while(1){
-        os_printf("this is task11-%d\r\n", cnt++);
-        vTaskDelay(2000);
-    }
-}
+    /* creat app task in this */
 
-static void second_task(void *p)
-{
-    os_printf("%s\r\n", __FUNCTION__);
-    int cnt = 0;
 
     while(1){
-        os_printf("this is task22-%d\r\n", cnt++);
-        vTaskDelay(4000);
+        os_printf("this is creat task:idle-%d", cnt++);
+        vTaskDelay(1000);
+
+        if (cnt >= 120){
+            break;
+        }
     }
+
+    vTaskDelete(xTask_creat);
 }
 
 int main(void)
 {
     portBASE_TYPE xReturn = pdPASS;
 
-    os_printf("start \r\n");
+    os_printf("Freertos v10.2.1 start ");
 
-    xReturn = xTaskCreate((pdTASK_CODE    )first_task, 
-                          (const char *   )"first_task", 
-                          (unsigned short )128, 
-                          (void *         )NULL, 
-                          (portBASE_TYPE  )tskIDLE_PRIORITY + 2, 
-                          (xTaskHandle *  )&xTask_first);
-
-    if (pdPASS != xReturn){
-        return -1;
-    }
-
-    xReturn = xTaskCreate((pdTASK_CODE    )second_task, 
-                          (const char *   )"second_task", 
-                          (unsigned short )128, 
-                          (void *         )NULL, 
-                          (portBASE_TYPE  )tskIDLE_PRIORITY + 1, 
-                          (xTaskHandle *  )&xTask_second);
+    xReturn = xTaskCreate(  (TaskFunction_t )creat_task,
+                            (const char *   )"creat_task",
+                            (unsigned short )128,
+                            (void *         )NULL,
+                            (UBaseType_t    )1,
+                            (TaskHandle_t * )&xTask_creat);
 
     if (pdPASS != xReturn){
         return -1;
