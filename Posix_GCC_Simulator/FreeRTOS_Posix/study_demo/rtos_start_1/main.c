@@ -22,10 +22,12 @@ static void creat_task(void *p)
         os_printf("this is creat task:idle-%d", cnt++);
         vTaskDelay(1000);
 
-        if (cnt >= 120){
+        if (cnt >= 10){
             break;
         }
     }
+
+    os_printf("delete creat task");
 
     vTaskDelete(xTask_creat);
 }
