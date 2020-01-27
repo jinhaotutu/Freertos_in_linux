@@ -24,12 +24,12 @@ if [ ! -d "./output" ] ;then
     mkdir ./output
 fi
 
-if [ -f "./output/$APP_NAME""_app" ] ;then
-    rm ./output/$APP_NAME"_app"
+if [ -f "./output/$APP_NAME""_app".bin ] ;then
+    rm ./output/$APP_NAME"_app".bin
 fi
 
-if [ -f "./$APP_NAME""_app" ] ;then
-    rm ./$APP_NAME"_app"
+if [ -f "./$APP_NAME""_app".bin ] ;then
+    rm ./$APP_NAME"_app".bin
 fi
 
 cd ../../Debug
@@ -43,8 +43,8 @@ fi
 make -j4
 
 # rm ../study_demo/rtos_start_1/$APP_NAME_app_v$APP_VER
-cp FreeRTOS_Posix ../study_demo/$APP_NAME/$APP_NAME"_app"
-cp FreeRTOS_Posix ../study_demo/$APP_NAME/output/$APP_NAME"_app"
+cp FreeRTOS_Posix ../study_demo/$APP_NAME/$APP_NAME"_app".bin
+cp FreeRTOS_Posix ../study_demo/$APP_NAME/output/$APP_NAME"_app".bin
 
 echo ""
 echo "*******************************************************************"

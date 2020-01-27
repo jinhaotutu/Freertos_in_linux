@@ -55,3 +55,4 @@ dkms.conf
 .vscode
 Posix_GCC_Simulator/FreeRTOS_Posix/Debug/FreeRTOS_Posix
 *.DS_Store
+*.bin
