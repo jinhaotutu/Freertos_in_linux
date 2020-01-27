@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+#
+.vscode
+Posix_GCC_Simulator/FreeRTOS_Posix/Debug/FreeRTOS_Posix

@@ -22,4 +22,5 @@ FileIO \
 Common_Demo/Minimal \
 Common_Demo/Full \
 AsyncIO \
+study_demo/${APP_NAME} \
 
