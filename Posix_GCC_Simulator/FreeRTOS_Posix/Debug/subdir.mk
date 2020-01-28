@@ -3,17 +3,14 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-C_SRCS += \
-../study_demo/${APP_NAME}/main.c 
+C_SRCS += $(wildcard ../study_demo/${APP_NAME}/*.c)
 
-OBJS += \
-./main.o 
+OBJS += $(patsubst %.c, ./study_demo/%.o, $(notdir ${C_SRCS}))
 
-C_DEPS += \
-./main.d 
+C_DEPS += $(patsubst %.c, ./study_demo/%.d, $(notdir ${C_SRCS}))
 
 # Each subdirectory must supply rules for building sources it contributes
-%.o: ../study_demo/${APP_NAME}/%.c
+./study_demo/%.o: ../study_demo/${APP_NAME}/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
 	gcc -D__GCC_POSIX__=1 -DDEBUG_BUILD=1 -DUSE_STDIO=1 \
