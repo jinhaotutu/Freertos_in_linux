@@ -25,7 +25,7 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static TaskHandle_t xTask_creat;
+static TaskHandle_t xTask_creat = NULL;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -44,7 +44,9 @@ static void creat_task(void *p)
     int cnt = 0;
 
     /* creat app task in this 在这里创建应用任务 */
+    taskENTER_CRITICAL();
 
+    taskEXIT_CRITICAL();
 
     /* creat app task in this 在这里创建应用任务 */
 
@@ -72,7 +74,7 @@ static void creat_task(void *p)
   */
 int main(void)
 {
-    portBASE_TYPE xReturn = pdPASS;
+    BaseType_t xReturn = pdPASS;
 
     os_printf("Freertos v10.2.1 start ");
 

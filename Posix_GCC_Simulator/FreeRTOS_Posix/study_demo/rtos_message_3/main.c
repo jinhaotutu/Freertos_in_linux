@@ -1,14 +1,14 @@
 /**
   ******************************************************************************
-  * @file    task_app.c
+  * @file    main.c
   * @author  Tuu
   * @version V1.0.0
   * @date    2020-01-28
-  * @brief   task function
+  * @brief   Main program body
   ******************************************************************************
   * @attention
   * Freertos run in the linux
-  * 2.second: rtos_task_2 ---> rtos_task_2.bin
+  * 1.first_demo: rtos_start_1 ---> rtos_start_1.bin
   ******************************************************************************
   */
 
@@ -25,53 +25,67 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static TaskHandle_t task_demo = NULL;
+static TaskHandle_t xTask_creat;
 
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
 
 /**
-  * @brief  task_demo_cb
-  * @note   This function is used to run app task
+  * @brief  freertos first creat task
+  * @note   This function is used to creat app task and delect self.
   * @param  *p
   * @param  None
   * @retval None
   */
-static void task_demo_cb(void *p)
+static void creat_task(void *p)
 {
     os_printf("%s", __FUNCTION__);
+    int cnt = 0;
 
-    while(1){
-        os_printf("app task run");
+    /* creat app task in this 在这里创建应用任务 */
+    taskENTER_CRITICAL();
 
-        vTaskDelay(5000);
-    }
+    extern int app_task_init(void);
+    app_task_init();
+
+    taskEXIT_CRITICAL();
+    /* creat app task in this 在这里创建应用任务 */
+
+    os_printf("delete creat task");
+
+    vTaskDelete(xTask_creat);
 }
 
 /**
-  * @brief  app_task_init
+  * @brief  main
   * @note   None
   * @param  None
   * @param  None
   * @retval None
   */
-int app_task_init(void)
+int main(void)
 {
     BaseType_t xReturn = pdPASS;
 
-    os_printf("app task creat");
+    os_printf("Freertos v10.2.1 start ");
 
-    /* app task in this 创建rtos应用任务 */
-    xReturn = xTaskCreate(  (TaskFunction_t )task_demo_cb,
-                            (const char *   )"task_demo",
+    /* first creat task in this 创建rtos第一个任务，用于创建其他任务 */
+    xReturn = xTaskCreate(  (TaskFunction_t )creat_task,
+                            (const char *   )"creat_task",
                             (unsigned short )128,
                             (void *         )NULL,
                             (UBaseType_t    )1,
-                            (TaskHandle_t * )&task_demo);
+                            (TaskHandle_t * )&xTask_creat);
 
     if (pdPASS != xReturn){
         return -1;
+    }
+
+    /* start task 开启任务调度 */
+    vTaskStartScheduler();
+
+    while(1){
     }
 
     return 0;
