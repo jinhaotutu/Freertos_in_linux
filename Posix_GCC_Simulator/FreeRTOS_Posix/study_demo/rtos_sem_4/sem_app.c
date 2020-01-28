@@ -16,6 +16,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "semphr.h"
 
 #include "config.h"
 
@@ -26,39 +27,34 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static TaskHandle_t task_msg_send = NULL;
-static TaskHandle_t task_msg_rcv = NULL;
-static QueueHandle_t queue_demo = NULL;
+static TaskHandle_t task_sem_post = NULL;
+static TaskHandle_t task_sem_wait = NULL;
+static SemaphoreHandle_t sem_demo = NULL;
 
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
 
 /**
-  * @brief  task_msg_send_cb
+  * @brief  task_sem_post_cb
   * @note   None
   * @param  *p
   * @param  None
   * @retval None
   */
-static void task_msg_send_cb(void *p)
+static void task_sem_post_cb(void *p)
 {
     os_printf("%s", __FUNCTION__);
     BaseType_t xReturn = pdTRUE;
-    uint8_t msg_cnt = 0;
-    uint8_t msg_buf[32] = {0};
 
     while(1){
         os_printf("start send message");
 
-        memset(msg_buf, 0, 32);
-        snprintf(msg_buf, 32, "this is send msg_cnt:%d", msg_cnt++);
-
-        xReturn = xQueueSend(queue_demo, msg_buf, 0);
+        xReturn = xSemaphoreGive(sem_demo);
         if (pdTRUE == xReturn){
-            os_printf("send message succeed");
+            os_printf("post sem succeed");
         }else{
-            os_printf("send message error");
+            os_printf("post sem error");
         }
 
         vTaskDelay(2500);
@@ -66,70 +62,65 @@ static void task_msg_send_cb(void *p)
 }
 
 /**
-  * @brief  task_msg_rcv_cb
+  * @brief  task_sem_wait_cb
   * @note   None
   * @param  *p
   * @param  None
   * @retval None
   */
-static void task_msg_rcv_cb(void *p)
+static void task_sem_wait_cb(void *p)
 {
     os_printf("%s", __FUNCTION__);
     BaseType_t xReturn = pdTRUE;
-    uint8_t recv_msg[32] = {0};
 
     while(1){
-        os_printf("wait message");
-        memset(recv_msg, 0, 32);
-        xReturn = xQueueReceive(queue_demo, recv_msg, portMAX_DELAY);
+        os_printf("wait sem");
+        xReturn = xSemaphoreTake(sem_demo, portMAX_DELAY);
         if (pdTRUE == xReturn){
-            os_printf("recv message succeed:[%s]\r\n", recv_msg);
+            os_printf("get sem succeed\r\n");
         }else{
-            os_printf("recv message error\r\n");
+            os_printf("get sem error\r\n");
         }
     }
 }
 
 /**
-  * @brief  app_msg_init
+  * @brief  app_sem_init
   * @note   None
   * @param  None
   * @param  None
   * @retval None
   */
-int app_msg_init(void)
+int app_sem_init(void)
 {
     BaseType_t xReturn = pdPASS;
 
     os_printf("app task creat");
 
-    #define MSG_LEN     5
-    #define MSG_SIZE    64
-    queue_demo = xQueueCreate(  (UBaseType_t ) MSG_LEN,
-                                (UBaseType_t ) MSG_SIZE);
-    if (NULL == queue_demo){
+    sem_demo = xSemaphoreCreateBinary();
+    if (NULL == sem_demo){
         return -1;
     }
 
     /* message task 队列接收任务 */
-    xReturn = xTaskCreate(  (TaskFunction_t )task_msg_rcv_cb,
-                            (const char *   )"task_msg_rcv",
+    xReturn = xTaskCreate(  (TaskFunction_t )task_sem_post_cb,
+                            (const char *   )"task_sem_post",
                             (unsigned short )512,
                             (void *         )NULL,
                             (UBaseType_t    )1,
-                            (TaskHandle_t * )&task_msg_rcv);
+                            (TaskHandle_t * )&task_sem_post);
 
     if (pdPASS != xReturn){
         return -1;
     }
-    
+
     /* message task 队列发送任务 */
-    xReturn = xTaskCreate(  (TaskFunction_t )task_msg_send_cb,
-                            (const char *   )"task_msg_send",
+    xReturn = xTaskCreate(  (TaskFunction_t )task_sem_wait_cb,
+                            (const char *   )"task_sem_wait",
                             (unsigned short )512,
                             (void *         )NULL,
                             (UBaseType_t    )1,
-                            (TaskHandle_t * )&task_msg_send);
+                            (TaskHandle_t * )&task_sem_wait);
 
     if (pdPASS != xReturn){
         return -1;

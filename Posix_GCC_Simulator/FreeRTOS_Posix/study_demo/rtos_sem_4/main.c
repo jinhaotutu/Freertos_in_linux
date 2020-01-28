@@ -46,8 +46,8 @@ static void creat_task(void *p)
     /* creat app task in this 在这里创建应用任务 */
     taskENTER_CRITICAL();
 
-    extern int app_msg_init(void);
-    app_msg_init();
+    extern int app_sem_init(void);
+    app_sem_init();
 
     taskEXIT_CRITICAL();
     /* creat app task in this 在这里创建应用任务 */
