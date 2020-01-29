@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    task_app.c
+  * @file    task_cpu.c
   * @author  Tuu
   * @version V1.0.0
   * @date    2020-01-28
@@ -8,7 +8,6 @@
   ******************************************************************************
   * @attention
   * Freertos run in the linux
-  * 2.second: rtos_task_2 ---> rtos_task_2.bin
   ******************************************************************************
   */
 
@@ -25,61 +24,58 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static TaskHandle_t task_demo = NULL;
+static TaskHandle_t task_cpu  = NULL;
 
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
 
 /**
-  * @brief  task_demo_cb
-  * @note   This function is used to run app task
+  * @brief  task_cpu_cb
+  * @note   None
   * @param  *p
   * @param  None
   * @retval None
   */
-static void task_demo_cb(void *p)
+static void task_cpu_cb(void *p)
 {
     os_printf("%s", __FUNCTION__);
-    uint32_t cnt = 0x0fffffff;
+    uint8_t CPU_info[400] = {0};
 
     while(1){
-        os_printf("app task run");
+        vTaskDelay(5000);
 
-        while(cnt--);
-        cnt = 0x0fffffff;
+        memset(CPU_info, 0, 400);
+        vTaskGetRunTimeStats((char *)&CPU_info);
 
-        vTaskDelay(1000);
+        printf("\r\n------------- cpu info -------------\r\n");
+        printf("name            cnt            used\r\n");
+        printf("%s", CPU_info);
+        printf("------------------------------------\r\n\r\n");
     }
 }
 
 /**
-  * @brief  app_task_init
+  * @brief  cpu_task_init
   * @note   None
   * @param  None
   * @param  None
   * @retval None
   */
-int app_task_init(void)
+int cpu_task_init(void)
 {
     BaseType_t xReturn = pdPASS;
 
-    os_printf("app task creat");
-
-    /* app task in this 创建rtos应用任务 */
-    xReturn = xTaskCreate(  (TaskFunction_t )task_demo_cb,
-                            (const char *   )"task_demo",
-                            (unsigned short )128,
+    xReturn = xTaskCreate(  (TaskFunction_t )task_cpu_cb,
+                            (const char *   )"task_cpu",
+                            (unsigned short )512,
                             (void *         )NULL,
                             (UBaseType_t    )1,
-                            (TaskHandle_t * )&task_demo);
+                            (TaskHandle_t * )&task_cpu);
 
     if (pdPASS != xReturn){
         return -1;
     }
-
-    extern int cpu_task_init(void);
-    cpu_task_init();
 
     return 0;
 }
