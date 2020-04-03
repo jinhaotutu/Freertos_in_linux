@@ -8,7 +8,7 @@
   ******************************************************************************
   * @attention
   * Freertos run in the linux
-  * 2.second: rtos_task_2 ---> rtos_task_2.bin
+  * 5: rtos_message_second_5 ---> rtos_message_second_5.bin
   ******************************************************************************
   */
 
@@ -46,21 +46,11 @@ static void creat_task(void *p)
     /* creat app task in this 在这里创建应用任务 */
     taskENTER_CRITICAL();
 
-    extern int app_task_init(void);
-    app_task_init();
+    extern int app_msg_init(void);
+    app_msg_init();
 
     taskEXIT_CRITICAL();
     /* creat app task in this 在这里创建应用任务 */
-
-    /* delay task 延时退出，并删除本任务 */
-    while(1){
-        os_printf("this is creat task:idle-%d", cnt++);
-        vTaskDelay(1000);
-
-        if (cnt >= 10){
-            break;
-        }
-    }
 
     os_printf("delete creat task");
 

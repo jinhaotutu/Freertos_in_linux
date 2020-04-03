@@ -1,14 +1,14 @@
 /**
   ******************************************************************************
-  * @file    sem_app.c
+  * @file    mutex_app.c
   * @author  Tuu
   * @version V1.0.0
   * @date    2020-01-28
-  * @brief   message function
+  * @brief   mutex function
   ******************************************************************************
   * @attention
   * Freertos run in the linux
-  * 4: rtos_sem_4 ---> rtos_sem_4.bin
+  * 6: rtos_mutex_6 ---> rtos_mutex_6.bin
   ******************************************************************************
   */
 
@@ -22,14 +22,23 @@
 
 /* Private define ------------------------------------------------------------*/
 
+/* 宏定义说明：利用两个线程对同一个变量进行自++操作，来模拟mutex的作用
+ * 用延迟来模拟极端条件下的资源抢占，在不使能mutex可以发现变量的自++不在预期范围内，
+ * 导致每个线程的取值可能不符合预期，程序可能会出现未知的情况；使能mutex后可以发现变量
+ * 正常的递增++
+ */
+#define ENABLE_MUTEX    1
+
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static TaskHandle_t task_sem_post = NULL;
-static TaskHandle_t task_sem_wait = NULL;
-static SemaphoreHandle_t sem_demo = NULL;
+static TaskHandle_t task_mutex_1 = NULL;
+static TaskHandle_t task_mutex_2 = NULL;
+static SemaphoreHandle_t mutex_demo = NULL;
+
+static uint32_t mutex_cnt = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -42,22 +51,31 @@ static SemaphoreHandle_t sem_demo = NULL;
   * @param  None
   * @retval None
   */
-static void task_sem_post_cb(void *p)
+static void task_mutex_1_cb(void *p)
 {
     os_printf("%s", __FUNCTION__);
     BaseType_t xReturn = pdTRUE;
+    uint32_t cnt = 0;
 
     while(1){
-        os_printf("start send message");
+#if ENABLE_MUTEX
+        xSemaphoreTake(mutex_demo, portMAX_DELAY);
+#endif
 
-        xReturn = xSemaphoreGive(sem_demo);
-        if (pdTRUE == xReturn){
-            os_printf("post sem succeed");
-        }else{
-            os_printf("post sem error");
-        }
+        mutex_cnt++;
+        cnt = mutex_cnt;
 
-        vTaskDelay(2500);
+        vTaskDelay(3000);
+
+        os_printf("mutex task1 printf in cnt:%d", mutex_cnt);
+        mutex_cnt = cnt;
+        // os_printf("mutex task1 printf out cnt:%d\r\n", mutex_cnt);
+
+#if ENABLE_MUTEX
+        xSemaphoreGive(mutex_demo);
+#endif
+
+        vTaskDelay(1000);
     }
 }
 
@@ -68,19 +86,31 @@ static void task_sem_post_cb(void *p)
   * @param  None
   * @retval None
   */
-static void task_sem_wait_cb(void *p)
+static void task_mutex_2_cb(void *p)
 {
     os_printf("%s", __FUNCTION__);
     BaseType_t xReturn = pdTRUE;
+    uint32_t cnt = 0;
 
     while(1){
-        os_printf("wait sem");
-        xReturn = xSemaphoreTake(sem_demo, portMAX_DELAY);
-        if (pdTRUE == xReturn){
-            os_printf("get sem succeed\r\n");
-        }else{
-            os_printf("get sem error\r\n");
-        }
+        vTaskDelay(1000);
+
+#if ENABLE_MUTEX
+        xSemaphoreTake(mutex_demo, portMAX_DELAY);
+#endif
+
+        mutex_cnt++;
+        cnt = mutex_cnt;
+
+        vTaskDelay(3000);
+
+        os_printf("mutex task2 printf in cnt:%d", mutex_cnt);
+        mutex_cnt = cnt;
+        // os_printf("mutex task2 printf out cnt:%d\r\n", mutex_cnt);
+
+#if ENABLE_MUTEX
+        xSemaphoreGive(mutex_demo);
+#endif
     }
 }
 
@@ -97,30 +127,30 @@ int app_sem_init(void)
 
     os_printf("app task creat");
 
-    sem_demo = xSemaphoreCreateBinary();
-    if (NULL == sem_demo){
+    mutex_demo = xSemaphoreCreateMutex();
+    if (NULL == mutex_demo){
         return -1;
     }
 
     /* message task 队列接收任务 */
-    xReturn = xTaskCreate(  (TaskFunction_t )task_sem_post_cb,
-                            (const char *   )"task_sem_post",
+    xReturn = xTaskCreate(  (TaskFunction_t )task_mutex_1_cb,
+                            (const char *   )"task_mutex_1",
                             (unsigned short )512,
                             (void *         )NULL,
                             (UBaseType_t    )1,
-                            (TaskHandle_t * )&task_sem_post);
+                            (TaskHandle_t * )&task_mutex_1);
 
     if (pdPASS != xReturn){
         return -1;
     }
 
     /* message task 队列发送任务 */
-    xReturn = xTaskCreate(  (TaskFunction_t )task_sem_wait_cb,
-                            (const char *   )"task_sem_wait",
+    xReturn = xTaskCreate(  (TaskFunction_t )task_mutex_2_cb,
+                            (const char *   )"task_mutex_2",
                             (unsigned short )512,
                             (void *         )NULL,
                             (UBaseType_t    )1,
-                            (TaskHandle_t * )&task_sem_wait);
+                            (TaskHandle_t * )&task_mutex_2);
 
     if (pdPASS != xReturn){
         return -1;
