@@ -115,13 +115,13 @@ static void task_mutex_2_cb(void *p)
 }
 
 /**
-  * @brief  app_sem_init
+  * @brief  app_init
   * @note   None
   * @param  None
   * @param  None
   * @retval None
   */
-int app_sem_init(void)
+int app_init(void)
 {
     BaseType_t xReturn = pdPASS;
 

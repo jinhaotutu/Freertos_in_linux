@@ -164,13 +164,13 @@ static void task_msg_rcv_cb(void *p)
 }
 
 /**
-  * @brief  app_msg_init
+  * @brief  app_init
   * @note   None
   * @param  None
   * @param  None
   * @retval None
   */
-int app_msg_init(void)
+int app_init(void)
 {
     BaseType_t xReturn = pdPASS;
 

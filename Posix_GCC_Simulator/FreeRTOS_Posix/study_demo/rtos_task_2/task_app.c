@@ -54,13 +54,13 @@ static void task_demo_cb(void *p)
 }
 
 /**
-  * @brief  app_task_init
+  * @brief  app_init
   * @note   None
   * @param  None
   * @param  None
   * @retval None
   */
-int app_task_init(void)
+int app_init(void)
 {
     BaseType_t xReturn = pdPASS;
 

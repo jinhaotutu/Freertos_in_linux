@@ -48,7 +48,7 @@ static void task_sem_post_cb(void *p)
     BaseType_t xReturn = pdTRUE;
 
     while(1){
-        os_printf("start send message");
+        os_printf("start post sem");
 
         xReturn = xSemaphoreGive(sem_demo);
         if (pdTRUE == xReturn){
@@ -85,13 +85,13 @@ static void task_sem_wait_cb(void *p)
 }
 
 /**
-  * @brief  app_sem_init
+  * @brief  app_init
   * @note   None
   * @param  None
   * @param  None
   * @retval None
   */
-int app_sem_init(void)
+int app_init(void)
 {
     BaseType_t xReturn = pdPASS;
 
